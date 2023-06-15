@@ -6,6 +6,9 @@
 ## Table of Contents
 * [General Info](#general-information)
 * [Features](#features)
+* [Results](#results)
+* [Setup](#setup)
+* [Usage](#usage)
 
 ## General Information
 - Provide general information about your project here.
