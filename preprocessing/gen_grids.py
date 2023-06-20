@@ -52,7 +52,7 @@ def gen_grids(grid_size, boundary_path, ground_truth_path, grids_geojson_path, g
     grids_valid["intersects"] = grids_valid.intersects(uv_boundary).map({True: 1, False: 0})
 
     # 计算有城中村的格网，城中村的面积占格网面积的比例
-    grids_valid["ratio"] = grids_valid.apply(cal_ratio, args=(uv_boundary,), axis=1)
+    grids_valid["ratio"] = grids_valid.apply(cal_ratio, args=(grid_size, uv_boundary,), axis=1)
     grids_valid["label"] = grids_valid["ratio"].apply(lambda x: 1 if x > threshold else 0)
 
     # 保存
