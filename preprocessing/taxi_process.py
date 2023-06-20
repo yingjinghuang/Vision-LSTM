@@ -40,6 +40,5 @@ def prepare_taxi(db_path, grids_path, taxi_joined_path, taxi_ts_path, threshold 
 
     # 多重列索引合并为一个索引
     valid_time_od_data.columns = ['_'.join(col).strip() for col in valid_time_od_data.columns.values]
-    valid_time_od_data
 
     valid_time_od_data.to_csv(taxi_ts_path)
