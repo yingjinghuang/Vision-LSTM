@@ -1,27 +1,26 @@
 # Vision-LSTM
-> Outline a brief description of your project.
+Although street-level imagery has emerged as a valuable tool for observing large-scale urban spaces with unprecedented detail, a more comprehensive and representative approach is required to capture the complexity and diversity of urban environments at different spatial scales.
+
+To address this issue, we propose a deep learning-based module called **Vision-LSTM**, which can effectively obtain vector representation from **varying numbers of street-level images** in spatial units. 
 
 ![Framework of Vision-LSTM](./img/Vision-LSTM.png)
 
 ## Table of Contents
-* [General Info](#general-information)
 * [Features](#features)
 * [Results](#results)
 * [Setup](#setup)
 * [Usage](#usage)
 
-## General Information
-- Provide general information about your project here.
-- What problem does it (intend to) solve?
-- What is the purpose of your project?
-- Why did you undertake it?
-<!-- You don't have to answer all the questions - just the ones relevant to your project. -->
 
 ## Features
-List the ready features here:
-- Awesome feature 1
-- Awesome feature 2
-- Awesome feature 3
+- A multimodal data fusion model (satellite imagery, street view imagery, human
+mobility) is proposed
+- Visual information and dynamic mobility information are both vital in urban
+village recognition
+- The Vision-LSTM module is proposed to extract visual features from a varying
+number of street images
+- The proposed method achieved an overall accuracy of 91.6% in identifying
+urban villages
 
 ## Results
 In our urban village recognition case, the results can be seen in the following table.
@@ -35,13 +34,19 @@ In our urban village recognition case, the results can be seen in the following 
 | **Vision-LSTM (proposed in this study)** | **91.6**  | **0.720** | **0.773** |
 
 ## Setup
-What are the project requirements/dependencies? Where are they listed? A requirements.txt or a Pipfile.lock file perhaps? Where is it located?
-
-Proceed to describe how to install / setup one's local environment / get started with the project.
+Will update with a requirement file.
 
 ## Usage
-How does one go about using it?
-Provide various use cases and code examples here.
+**Step 1**. Prepare your own datasets.
+**Step 2**. Run the [preprocess.py](preprocess.py) to preprocess data.
+```bash
+python preprocess.py
+```
+**Step 3**. Revise the configs in [configs.py](configs.py).
+**Step 4**. Train your own model.
+```bash
+python train.py
+```
 
 ## Citation
 Will be updated when it is accepted.
