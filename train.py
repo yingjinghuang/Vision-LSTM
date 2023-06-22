@@ -13,9 +13,6 @@ from modules.models import *
 from modules.trainUtils import *
 from configs import *
 
-
-# python grid_multi_feature.py multi_sum_weighted_concat --gpu 1 --mode sum --imbalance weighted --fusion concat
-
 def main(configs):
     device = torch.device("cuda")
 
