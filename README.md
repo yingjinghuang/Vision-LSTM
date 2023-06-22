@@ -38,11 +38,14 @@ Will update with a requirement file.
 
 ## Usage
 **Step 1**. Prepare your own datasets.
+
 **Step 2**. Run the [preprocess.py](preprocess.py) to preprocess data.
 ```bash
 python preprocess.py
 ```
+
 **Step 3**. Revise the configs in [configs.py](configs.py).
+
 **Step 4**. Train your own model.
 ```bash
 python train.py
