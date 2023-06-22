@@ -3,7 +3,7 @@ import geopandas as gpd
 import numpy as np
 import os
 
-def build_dataset(valid_sv_path_path, taxi_ts_path, grids_label_path, valid_ratio, grids_geojson_path, model_data_path, model_data_geo_path):
+def build_dataset(valid_feature_path, taxi_ts_path, grids_label_path, valid_ratio, grids_geojson_path, model_data_path, model_data_geo_path):
     sv = pd.read_pickle(valid_feature_path)
     taxi = pd.read_csv(taxi_ts_path, dtype = {"GID": str}, index_col=0)
     taxi = taxi.reset_index()

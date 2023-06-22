@@ -17,6 +17,7 @@ rs_tiff_path = "./data/raw/shenzhen.tiff"
 taxi_db_path = r".\data\taxi_valid2.db"
 sv_xy_info_path = r".\data\raw\shenzhen_all_50m_xy.csv"
 sv_path_path = r".\data\raw\shenzhen_all_50m_path.csv"
+sv_features_path = r".\data\features_all\*.csv"
 
 # Outputs
 output_folder = f"Vision-LSTM/data/grids{grid_size}"
@@ -59,4 +60,4 @@ features_join(valid_sv_path, sv_features_path, valid_feature_path)
 
 ## Step 5: Build datasets
 from preprocessing.build_dataset import build_dataset
-build_dataset(valid_sv_path_path, taxi_ts_path, grids_label_path, valid_ratio, grids_geojson_path, model_data_path, model_data_geo_path)
+build_dataset(valid_feature_path, taxi_ts_path, grids_label_path, valid_ratio, grids_geojson_path, model_data_path, model_data_geo_path)

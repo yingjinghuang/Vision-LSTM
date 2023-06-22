@@ -6,7 +6,7 @@ import torch.nn as nn
 from torch.nn.utils.rnn import pad_sequence
 import os, shutil
 
-from sklearn.metrics import confusion_matrix, f1_score, cohen_kappa_score
+
 
 def plot_confusion_matrix(cm, classes, normalize=False, title='State transition matrix', cmap=plt.cm.Blues):
     
@@ -44,23 +44,7 @@ def plot_confusion_matrix(cm, classes, normalize=False, title='State transition 
     
     plt.show()
 
-def cal_metrics(labels, predicts):
-     # 计算每个batch的混淆矩阵
-    cm = np.array(confusion_matrix(labels, predicts, labels=[0, 1]))
-    # 计算1类的召回率
-    if 1 in labels:
-        if cm.shape[0] > 1:
-            recall_rate = round(cm[1,1] / (cm[1,0] + cm[1,1]), 5)
-        else:
-            recall_rate = 1.00
-    else:
-        recall_rate = np.nan
 
-    # 计算 kappa 值
-    kappa = cohen_kappa_score(labels, predicts)
-    # 计算 F1 值
-    f1 = f1_score(labels, predicts)
-    return recall_rate, kappa, f1, cm
 
 def check_folder(folder, mode="create"):
     if os.path.exists(folder):
@@ -137,22 +121,3 @@ def collate_fn_end2end2(batch):
     label_tensor = torch.LongTensor(label_list)
     return f1_tensor, f2_tensor, label_tensor
 
-class AverageMeter(object):
-    """Computes and stores the average and current value"""
-    def __init__(self, name, fmt=':f'):
-        self.name = name
-        self.fmt = fmt
-        self.reset()
-
-    def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
-
-    def update(self, val, n=1):
-        if not np.isnan(val):
-            self.val = val
-            self.sum += val * n
-            self.count += n
-            self.avg = self.sum / self.count

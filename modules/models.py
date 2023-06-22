@@ -185,8 +185,6 @@ class SVFeatureBlock(nn.Module):
 
         if mode == 'lstm':
             self.lstm = nn.LSTM(512, 512, 1, batch_first=True)
-        elif mode == 'vit':
-            self.vit = ViT()
     
     def forward(self, x):
         b, c, f = x.size() # batch, channnel, feature
@@ -371,165 +369,10 @@ class MultiFeature(nn.Module):
         x = self.fc(x)
         return x
 
-class MultiFeaturev2(nn.Module):
-    def __init__(self, mode='mean'):
-        super(MultiFeaturev2, self).__init__()
-        # Remote branch
-        model1 = models.resnet18(num_classes=2)
-        self.remote_backbone = torch.nn.Sequential(*(list(model1.children())[:-1])) # 提取512维特征
-
-        # SV branch
-        self.sv_backbone = SVFeatureBlock(mode)
-
-        # Taxi branch
-        self.taxi_backbone = LSTMFCNBlock(time_steps=340, num_variables=2)
-        
-        self.encoder = nn.TransformerEncoderLayer(d_model=512, nhead=8, batch_first=True)
-
-        self.fc = nn.Sequential(
-            # nn.BatchNorm1d(512),
-            nn.ReLU(),
-            nn.Linear(512, 2)
-        )
-
-    def forward(self, image, sv, taxi):
-        # Remote branch
-        x1 = self.remote_backbone(image) # 得到 (batch, 512)
-        x1 = x1.view(-1, 512)
-
-        # SV branch
-        x2 = self.sv_backbone(sv)
-
-        # taxi branch
-        x3 = self.taxi_backbone(taxi)
-
-        x = torch.stack((x1, x2, x3), dim=1) # (batch, 3, 512)
-        x = self.encoder(x) # (batch, 3, 512)
-        x = x[:,0] # 获取 class_token，（batch,512）
-        x = self.fc(x)
-        return x
-
 
 ################################################################################
 ############################### Multi Part  ####################################
 ################################################################################
-
-################################################################################
-################################ ViT Part  #####################################
-################################################################################
-
-class PatchEmbedding(nn.Module):
-    # 拼接 class token
-    def __init__(self, emb_size: int = 512):
-        super().__init__()
-        
-        self.cls_token = nn.Parameter(torch.randn(1,1, emb_size))
-        
-    def forward(self, x):
-        b, _, _ = x.shape
-        cls_tokens = repeat(self.cls_token, '() n e -> b n e', b=b)
-        # prepend the cls token to the input
-        x = torch.cat([cls_tokens, x], dim=1)
-        return x
-
-class MultiHeadAttention(nn.Module):
-    def __init__(self, emb_size: int = 512, num_heads: int = 8, dropout: float = 0):
-        super().__init__()
-        self.emb_size = emb_size
-        self.num_heads = num_heads
-        # fuse the queries, keys and values in one matrix
-        self.qkv = nn.Linear(emb_size, emb_size * 3)
-        self.att_drop = nn.Dropout(dropout)
-        self.projection = nn.Linear(emb_size, emb_size)
-        
-    def forward(self, x : Tensor, mask: Tensor = None) -> Tensor:
-        # split keys, queries and values in num_heads
-        qkv = rearrange(self.qkv(x), "b n (h d qkv) -> (qkv) b h n d", h=self.num_heads, qkv=3)
-        queries, keys, values = qkv[0], qkv[1], qkv[2]
-        # sum up over the last axis
-        energy = torch.einsum('bhqd, bhkd -> bhqk', queries, keys) # batch, num_heads, query_len, key_len
-        if mask is not None:
-            fill_value = torch.finfo(torch.float32).min
-            energy.mask_fill(~mask, fill_value)
-            
-        scaling = self.emb_size ** (1/2)
-        att = F.softmax(energy, dim=-1) / scaling
-        att = self.att_drop(att)
-        # sum up over the third axis
-        out = torch.einsum('bhal, bhlv -> bhav ', att, values)
-        out = rearrange(out, "b h n d -> b n (h d)")
-        out = self.projection(out)
-        return out
-
-class ResidualAdd(nn.Module):
-    def __init__(self, fn):
-        super().__init__()
-        self.fn = fn
-        
-    def forward(self, x, **kwargs):
-        res = x
-        x = self.fn(x, **kwargs)
-        x += res
-        return x
-
-class FeedForwardBlock(nn.Sequential):
-    def __init__(self, emb_size: int, expansion: int = 4, drop_p: float = 0.):
-        super().__init__(
-            nn.Linear(emb_size, expansion * emb_size),
-            nn.GELU(),
-            nn.Dropout(drop_p),
-            nn.Linear(expansion * emb_size, emb_size),
-        )       
-
-class TransformerEncoderBlock(nn.Sequential):
-    def __init__(self,
-                 emb_size: int = 512,
-                 drop_p: float = 0.,
-                 forward_expansion: int = 4,
-                 forward_drop_p: float = 0.,
-                 ** kwargs):
-        super().__init__(
-            ResidualAdd(nn.Sequential(
-                nn.LayerNorm(emb_size),
-                MultiHeadAttention(emb_size, **kwargs),
-                nn.Dropout(drop_p)
-            )),
-            ResidualAdd(nn.Sequential(
-                nn.LayerNorm(emb_size),
-                FeedForwardBlock(
-                    emb_size, expansion=forward_expansion, drop_p=forward_drop_p),
-                nn.Dropout(drop_p)
-            )
-            ))
-
-class TransformerEncoder(nn.Sequential):
-    def __init__(self, depth: int = 6, **kwargs):
-        super().__init__(*[TransformerEncoderBlock(**kwargs) for _ in range(depth)])
-
-class GetClassToken(nn.Module):
-    def __init__(self, emb_size: int = 512):
-        super().__init__()
-    
-    def forward(self, x):
-        return x[:,0]
-
-class ClassificationHead(nn.Sequential):
-    def __init__(self, emb_size: int = 512):
-        super().__init__(
-            GetClassToken(emb_size),
-            # Reduce('b n e -> b e', reduction='mean'),
-            nn.LayerNorm(emb_size))
-
-class ViT(nn.Sequential):
-    def __init__(self,     
-                emb_size: int = 512,
-                depth: int = 12,
-                **kwargs):
-        super().__init__(
-            PatchEmbedding(emb_size),
-            TransformerEncoder(depth, emb_size=emb_size, **kwargs),
-            ClassificationHead(emb_size)
-        )
 
 ################################################################################
 ########################## two modal Part  #####################################
