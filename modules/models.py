@@ -86,7 +86,23 @@ class LSTMFCNBlock(nn.Module):
         # concatenate blocks output
         x = torch.cat([x1, x2], 1)
         return x
+
+class TaxiNet(nn.Module):
+    def __init__(self):
+        super(TaxiNet, self).__init__()
+        self.backbone = LSTMFCNBlock()
+
+        self.fc = nn.Sequential(
+            # nn.BatchNorm1d(512),
+            nn.ReLU(),
+            nn.Linear(512, 2)
+        )
     
+    def forward(self, x):
+        x = self.backbone(x)
+        x = self.fc(x)
+        
+        return x
 ################################################################################
 ################################ SV Part #####################################
 ################################################################################
@@ -209,9 +225,6 @@ class SVFeatureBlock(nn.Module):
                 x_tmp, (h_n, c_n) = self.lstm(x_tmp.view(1, -1, 512)) # 输入 lstm 需要加上 batch 这个维度
                 x_tmp = x_tmp[:,-1,:] # 只取最后一层的输出 # （1,1,512)
                 x_tmp = torch.squeeze(x_tmp) # 得到 (512)
-            elif self.mode == "vit":
-                x_tmp = self.vit(x_tmp.view(1, -1, 512)) # 输入 lstm 需要加上 batch 这个维度
-                x_tmp = torch.squeeze(x_tmp) # 得到 (512)
             else:
                 pass
         
@@ -300,7 +313,7 @@ class RemoteNet(nn.Module):
 ################################################################################
 
 class MultiFeature1SV(nn.Module):
-    def __init__(self, mode='mean'):
+    def __init__(self):
         super(MultiFeature1SV, self).__init__()
         # Remote branch
         model1 = models.resnet18(num_classes=2)

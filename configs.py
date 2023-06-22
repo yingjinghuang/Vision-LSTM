@@ -24,14 +24,16 @@ configs = {
     # number of workers
     "workers" : 6,
     # the mode to decomposite street view
-    # Format: mean, max, sum, lstm
+    # Format: single, mean, max, sum, lstm
     "mode" : "mean", 
 
     "modality_count": 3,
+    "modalities": ["remote", "sv", "mobility"], 
 
     # Paths
     "weights_folder": "./weights",
     "tensorboard_folder": "./tensorboard",
     "log_folder": "./logs",
     "model_data_path": "data/grids/model_data.pkl",
+    "rs_path": "Vision-LSTM/data/grids500/rs_tiles"
 }

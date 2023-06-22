@@ -7,8 +7,8 @@ import pandas as pd
 from collections import Counter
 import imblearn
 
-from modules.utils import check_folder, Logger, collate_fn_end2end
-from modules.datasets import MultiDataset
+from modules.utils import *
+from modules.datasets import *
 from modules.models import *
 from modules.trainUtils import *
 from configs import *
@@ -58,31 +58,82 @@ def main(configs):
     oversampler = imblearn.over_sampling.RandomOverSampler()
     x_train, y_train = oversampler.fit_resample(x_train, y_train)
 
-    train_dataset = MultiDataset(x_train["GID"].to_numpy(), x_train["features"].to_numpy(), x_train[taxi_features_col].to_numpy(), y_train, image_dir)
-    val_dataset = MultiDataset(x_val["GID"].to_numpy(), x_val["features"].to_numpy(), x_val[taxi_features_col].to_numpy(), y_val, image_dir, mode='valid')
+    if configs.modality_count == 3:
+        if configs.mode == "single":
+            train_dataset = MultiDataset1SV(x_train["GID"].to_numpy(), x_train["features"].to_numpy(), x_train[taxi_features_col].to_numpy(), y_train, configs.rs_path)
+            val_dataset = MultiDataset1SV(x_val["GID"].to_numpy(), x_val["features"].to_numpy(), x_val[taxi_features_col].to_numpy(), y_val, configs.rs_path, mode='valid')
+            model = MultiFeature1SV()
+        else:
+            train_dataset = MultiDataset(x_train["GID"].to_numpy(), x_train["features"].to_numpy(), x_train[taxi_features_col].to_numpy(), y_train, configs.rs_path)
+            val_dataset = MultiDataset(x_val["GID"].to_numpy(), x_val["features"].to_numpy(), x_val[taxi_features_col].to_numpy(), y_val, configs.rs_path, mode='valid')
+            model = MultiFeature(mode=configs.mode)
+        collate_fn = collate_fn_end2end
+        
+    elif configs.modality_count == 2:
+        train_dataset = TwoDataset(x_train["GID"].to_numpy(), x_train["features"].to_numpy(), x_train[taxi_features_col].to_numpy(), y_train, configs.rs_path, configs.modalities)
+        val_dataset = TwoDataset(x_val["GID"].to_numpy(), x_val["features"].to_numpy(), x_val[taxi_features_col].to_numpy(), y_val, configs.rs_path, configs.modalities, mode='valid')
+        if "sv" in configs.modalities:
+            collate_fn = collate_fn_end2end2
+        else:
+            collate_fn = None
+        model = TwoFeature(mode=configs.mode, modal=configs.modalities)
+    else:
+        if "remote" in configs.modalities:
+            train_dataset = RemoteData(x_train["GID"].to_numpy(), y_train, configs.rs_path)
+            val_dataset = RemoteData(x_val["GID"].to_numpy(), y_val, configs.rs_path, mode='valid')
+            collate_fn = None
+            model = RemoteNet()
+        elif "sv" in configs.modalities:
+            train_dataset = SVFeatureDataset(x_train["features"].to_numpy(), y_train)
+            val_dataset = SVFeatureDataset(x_val["features"].to_numpy(), y_val, mode='valid')
+            collate_fn = collate_fn_sv
+            model = SVFeature(mode=configs.mode)
+        else:
+            train_dataset = TaxiDataset(x_train[taxi_features_col].to_numpy(), y_train)
+            val_dataset = TaxiDataset(x_val[taxi_features_col].to_numpy(), y_val, mode='valid')
+            collate_fn = None
+            model = TaxiNet()
+
     logger.log("dataset prepared done.")
     logger.log("Train Dataset size: ", len(train_dataset), "Validation Dataset size: ", len(val_dataset))
 
     # 定义data loader
-    train_loader = DataLoader(
-            dataset=train_dataset,
-            batch_size=configs.batch_size, 
-            shuffle=True,
-            num_workers=configs.workers,
-            pin_memory=True,
-            collate_fn=collate_fn_end2end
-        )
+    if collate_fn is None:
+        train_loader = DataLoader(
+                dataset=train_dataset,
+                batch_size=configs.batch_size, 
+                shuffle=True,
+                num_workers=configs.workers,
+                pin_memory=True
+            )
 
-    val_loader = DataLoader(
-            dataset=val_dataset,
-            batch_size=configs.batch_size, 
-            shuffle=False,
-            num_workers=configs.workers,
-            pin_memory=True,
-            collate_fn=collate_fn_end2end
-        )
+        val_loader = DataLoader(
+                dataset=val_dataset,
+                batch_size=configs.batch_size, 
+                shuffle=False,
+                num_workers=configs.workers,
+                pin_memory=True
+            )
+    else:
+        train_loader = DataLoader(
+                dataset=train_dataset,
+                batch_size=configs.batch_size, 
+                shuffle=True,
+                num_workers=configs.workers,
+                pin_memory=True,
+                collate_fn=collate_fn
+            )
 
-    model = MultiFeature(mode=configs.mode)
+        val_loader = DataLoader(
+                dataset=val_dataset,
+                batch_size=configs.batch_size, 
+                shuffle=False,
+                num_workers=configs.workers,
+                pin_memory=True,
+                collate_fn=collate_fn
+            )
+
+    
     model = model.to(device)
     
     # 使用加权交叉熵

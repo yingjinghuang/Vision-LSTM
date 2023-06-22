@@ -245,7 +245,7 @@ class MultiDataset1SV(Dataset):
         return len(self.img_list)
 
 class TwoDataset(Dataset):
-    def __init__(self, img_list, sv_list, taxi_list, modal, label_list, image_dir_path, resize_size=(224, 224), mode='train'):
+    def __init__(self, img_list, sv_list, taxi_list, label_list, image_dir_path, modal, resize_size=(224, 224), mode='train'):
         self.modal = modal
         self.img_list = img_list
         self.sv_list = sv_list
