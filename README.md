@@ -1,18 +1,21 @@
 # Vision-LSTM
-Although street-level imagery has emerged as a valuable tool for observing large-scale urban spaces with unprecedented detail, a more comprehensive and representative approach is required to capture the complexity and diversity of urban environments at different spatial scales.
+Authors: Yingjing Huang, Fan zhang, Yong Gao, Wei Tu, Fabio Duarte, Carlo Ratti, Diansheng Guo, Yu Liu
 
-To address this issue, we propose a deep learning-based module called **Vision-LSTM**, which can effectively obtain vector representation from **varying numbers of street-level images** in spatial units. 
+## Abstract
+Street-level imagery has emerged as a valuable tool for observing large-scale urban spaces with unprecedented detail. However, previous studies have been limited to analyzing individual street-level images. This approach falls short in representing the characteristics of a spatial unit, such as a street or grid, which may contain a varying number of street view images ranging from several to hundreds. As a result, a more comprehensive and representative approach is required to capture the complexity and diversity of urban environments at different spatial scales. To address this issue, this study proposes a deep learning-based module called **Vision-LSTM**, which can effectively **obtain vector representation from varying numbers of street-level images in spatial units**. The effectiveness of the module is validated through experiments to recognize urban villages, achieving reliable recognition results (overall accuracy: 91.6\%) through multimodal learning that combines street-level imagery with remote sensing imagery and social sensing data. Compared to existing image fusion methods, Vision-LSTM demonstrates significant effectiveness in capturing associations between street-level images. The proposed module can provide a more comprehensive understanding of urban space, enhancing the research value of street-level imagery and facilitating multimodal learning-based urban research. Our models are available at https://github.com/yingjinghuang/Vision-LSTM.
 
 ![Framework of Vision-LSTM](./img/Vision-LSTM.png)
 
-## Table of Contents
-* [Features](#features)
-* [Results](#results)
-* [Setup](#setup)
-* [Usage](#usage)
+## Citation
+<!-- **If you find the resource useful, please cite the following :- )** -->
+```bibtex
+
+```
+
+Will be updated when it is accepted.
 
 
-## Features
+## Highlights
 - A multimodal data fusion model (satellite imagery, street view imagery, human
 mobility) is proposed
 - Visual information and dynamic mobility information are both vital in urban
@@ -50,6 +53,3 @@ python preprocess.py
 ```bash
 python train.py
 ```
-
-## Citation
-Will be updated when it is accepted.
