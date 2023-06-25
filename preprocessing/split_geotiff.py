@@ -47,7 +47,7 @@ def split_image_by_shapefile(image_path, shapefile_path, output_dir):
                             }
                         )
             # 保存文件
-            with rio.open(os.path.join(output_dir, "{}.tif".format(gdf.iloc[i].name)), "w", **out_meta) as dest:
+            with rio.open(os.path.join(output_dir, "{}.tif".format(gdf.iloc[i].GID)), "w", **out_meta) as dest:
                 dest.write(clip_res[0])
             # print("Blcok group {} insects".format(i))
         except Exception as e:

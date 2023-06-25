@@ -14,25 +14,27 @@ from modules.trainUtils import *
 from configs import *
 
 def main(configs):
+    print(configs)
     device = torch.device("cuda")
 
     os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID" 
-    os.environ["CUDA_VISIBLE_DEVICES"]= configs.gpu
+    os.environ["CUDA_VISIBLE_DEVICES"]= configs["gpu"]
 
-    models_path = os.path.join(configs.weights_folder, configs.model_name)
-    tensorboard_path = os.path.join(configs.tensorboard_folder, configs.model_name)
-    logs_path = os.path.join(configs.log_folder, configs.model_name + ".log")
+    models_path = os.path.join(configs["weights_folder"], configs["model_name"])
+    tensorboard_path = os.path.join(configs["tensorboard_folder"], configs["model_name"])
+    logs_folder = os.path.join(configs["log_folder"], configs["model_name"])
+    logs_path =  os.path.join(logs_folder, configs["model_name"] + ".log")
 
     check_folder(models_path)
     check_folder(tensorboard_path)
-    check_folder(configs.log_folder)
+    check_folder(logs_folder)
 
     logger = Logger(logs_path)
     logger.log(configs)
 
     writer = tensorboard.SummaryWriter(tensorboard_path + "/")
     
-    data_df = pd.read_pickle(configs.model_data_path)
+    data_df = pd.read_pickle(configs["model_data_path"])
     taxi_features_col = list(data_df.columns[2:-2])
     # Columns: GID,features,[taxi_features],label,mode
     logger.log("data loaded!")
@@ -55,36 +57,36 @@ def main(configs):
     oversampler = imblearn.over_sampling.RandomOverSampler()
     x_train, y_train = oversampler.fit_resample(x_train, y_train)
 
-    if configs.modality_count == 3:
-        if configs.mode == "single":
-            train_dataset = MultiDataset1SV(x_train["GID"].to_numpy(), x_train["features"].to_numpy(), x_train[taxi_features_col].to_numpy(), y_train, configs.rs_path)
-            val_dataset = MultiDataset1SV(x_val["GID"].to_numpy(), x_val["features"].to_numpy(), x_val[taxi_features_col].to_numpy(), y_val, configs.rs_path, mode='valid')
+    if configs["modality_count"] == 3:
+        if configs["mode"] == "single":
+            train_dataset = MultiDataset1SV(x_train["GID"].to_numpy(), x_train["features"].to_numpy(), x_train[taxi_features_col].to_numpy(), y_train, configs["rs_path"])
+            val_dataset = MultiDataset1SV(x_val["GID"].to_numpy(), x_val["features"].to_numpy(), x_val[taxi_features_col].to_numpy(), y_val, configs["rs_path"], mode='valid')
             model = MultiFeature1SV()
         else:
-            train_dataset = MultiDataset(x_train["GID"].to_numpy(), x_train["features"].to_numpy(), x_train[taxi_features_col].to_numpy(), y_train, configs.rs_path)
-            val_dataset = MultiDataset(x_val["GID"].to_numpy(), x_val["features"].to_numpy(), x_val[taxi_features_col].to_numpy(), y_val, configs.rs_path, mode='valid')
-            model = MultiFeature(mode=configs.mode)
+            train_dataset = MultiDataset(x_train["GID"].to_numpy(), x_train["features"].to_numpy(), x_train[taxi_features_col].to_numpy(), y_train, configs["rs_path"])
+            val_dataset = MultiDataset(x_val["GID"].to_numpy(), x_val["features"].to_numpy(), x_val[taxi_features_col].to_numpy(), y_val, configs["rs_path"], mode='valid')
+            model = MultiFeature(mode=configs["mode"])
         collate_fn = collate_fn_end2end
         
-    elif configs.modality_count == 2:
-        train_dataset = TwoDataset(x_train["GID"].to_numpy(), x_train["features"].to_numpy(), x_train[taxi_features_col].to_numpy(), y_train, configs.rs_path, configs.modalities)
-        val_dataset = TwoDataset(x_val["GID"].to_numpy(), x_val["features"].to_numpy(), x_val[taxi_features_col].to_numpy(), y_val, configs.rs_path, configs.modalities, mode='valid')
-        if "sv" in configs.modalities:
+    elif configs["modality_count"] == 2:
+        train_dataset = TwoDataset(x_train["GID"].to_numpy(), x_train["features"].to_numpy(), x_train[taxi_features_col].to_numpy(), y_train, configs["rs_path"], configs["modalities"])
+        val_dataset = TwoDataset(x_val["GID"].to_numpy(), x_val["features"].to_numpy(), x_val[taxi_features_col].to_numpy(), y_val, configs["rs_path"], configs["modalities"], mode='valid')
+        if "sv" in configs["modalities"]:
             collate_fn = collate_fn_end2end2
         else:
             collate_fn = None
-        model = TwoFeature(mode=configs.mode, modal=configs.modalities)
+        model = TwoFeature(mode=configs["mode"], modal=configs["modalities"])
     else:
-        if "remote" in configs.modalities:
-            train_dataset = RemoteData(x_train["GID"].to_numpy(), y_train, configs.rs_path)
-            val_dataset = RemoteData(x_val["GID"].to_numpy(), y_val, configs.rs_path, mode='valid')
+        if "remote" in configs["modalities"]:
+            train_dataset = RemoteData(x_train["GID"].to_numpy(), y_train, configs["rs_path"])
+            val_dataset = RemoteData(x_val["GID"].to_numpy(), y_val, configs["rs_path"], mode='valid')
             collate_fn = None
             model = RemoteNet()
-        elif "sv" in configs.modalities:
+        elif "sv" in configs["modalities"]:
             train_dataset = SVFeatureDataset(x_train["features"].to_numpy(), y_train)
             val_dataset = SVFeatureDataset(x_val["features"].to_numpy(), y_val, mode='valid')
             collate_fn = collate_fn_sv
-            model = SVFeature(mode=configs.mode)
+            model = SVFeature(mode=configs["mode"])
         else:
             train_dataset = TaxiDataset(x_train[taxi_features_col].to_numpy(), y_train)
             val_dataset = TaxiDataset(x_val[taxi_features_col].to_numpy(), y_val, mode='valid')
@@ -98,39 +100,39 @@ def main(configs):
     if collate_fn is None:
         train_loader = DataLoader(
                 dataset=train_dataset,
-                batch_size=configs.batch_size, 
+                batch_size=configs["batch_size"], 
                 shuffle=True,
-                num_workers=configs.workers,
+                num_workers=configs["workers"],
                 pin_memory=True
             )
 
         val_loader = DataLoader(
                 dataset=val_dataset,
-                batch_size=configs.batch_size, 
+                batch_size=configs["batch_size"], 
                 shuffle=False,
-                num_workers=configs.workers,
+                num_workers=configs["workers"],
                 pin_memory=True
             )
     else:
         train_loader = DataLoader(
                 dataset=train_dataset,
-                batch_size=configs.batch_size, 
+                batch_size=configs["batch_size"], 
                 shuffle=True,
-                num_workers=configs.workers,
+                num_workers=configs["workers"],
                 pin_memory=True,
                 collate_fn=collate_fn
             )
 
         val_loader = DataLoader(
                 dataset=val_dataset,
-                batch_size=configs.batch_size, 
+                batch_size=configs["batch_size"], 
                 shuffle=False,
-                num_workers=configs.workers,
+                num_workers=configs["workers"],
                 pin_memory=True,
                 collate_fn=collate_fn
             )
 
-    
+    print(next(iter(train_loader)))
     model = model.to(device)
     
     # 使用加权交叉熵
@@ -138,28 +140,34 @@ def main(configs):
     
     # 初始化一个优化器，我们可以自行调节一些超参数进行微调，比如说学习率
     # optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-    optimizer = torch.optim.SGD(model.parameters(), lr=configs.lr, weight_decay=configs.wd, momentum=0.9)
+    optimizer = torch.optim.SGD(model.parameters(), lr=configs["lr"], weight_decay=configs["wd"], momentum=0.9)
     # 学习率衰减
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=configs.lr_p, factor=configs.lr_f, verbose=True)
+    t = 10 # warmup
+    T = configs["epochs"] # epochs - 10 为 cosine rate
+    lr_warm = configs["epochs"]
+    n_t = 0.5
+    # lf = lambda x: ((1 + math.cos(x * math.pi / args.epochs)) /2 ) * (1 - args.lr_factor) + args.lr_factor # cosine
+    lf = lambda epoch: (0.9 * epoch / t + 0.1) if epoch < t else 0.1 if n_t * (1 + math.cos(math.pi * (epoch - t) / (T - t)))<0.1 else n_t * (1+math.cos(math.pi*(epoch - t)/(T-t)))
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lf)
 
     best_loss = 500.0
 
-    for epoch in range(configs.epochs):
+    for epoch in range(configs["epochs"]):
          # ---------- Training ----------
-        if configs.modality_count == 3:
+        if configs["modality_count"] == 3:
             train_metrics = train_one_epoch_3m(model, criterion, optimizer, train_loader, device)
-        elif configs.modality_count == 2:
+        elif configs["modality_count"] == 2:
             train_metrics = train_one_epoch_2m(model, criterion, optimizer, train_loader, device)
         else:
             train_metrics = train_one_epoch_1m(model, criterion, optimizer, train_loader, device)
         
         # ---------- Validation ----------
-        if configs.modality_count == 3:
-            val_metrics = train_one_epoch_3m(model, criterion, val_loader, device)
-        elif configs.modality_count == 2:
-            val_metrics = train_one_epoch_2m(model, criterion, val_loader, device)
+        if configs["modality_count"] == 3:
+            val_metrics = validate_3m(model, criterion, val_loader, device)
+        elif configs["modality_count"] == 2:
+            val_metrics = validate_2m(model, criterion, val_loader, device)
         else:
-            val_metrics = train_one_epoch_1m(model, criterion, val_loader, device)
+            val_metrics = validate_1m(model, criterion, val_loader, device)
         
         
         scheduler.step()
@@ -177,8 +185,8 @@ def main(configs):
 
         train_metrics_str = ", ".join([f"{k} = {v:.5f}" for k, v in train_metrics.items()])
         val_metrics_str = ", ".join([f"{k} = {v:.5f}" for k, v in val_metrics.items()])
-        logger.log(f"[ Train | {epoch + 1:03d}/{configs.epochs:03d} ] {train_metrics_str}\n[ Val | {epoch + 1:03d}/{configs.epochs:03d} ] {val_metrics_str}")
-        print(f"[ Train | {epoch + 1:03d}/{configs.epochs:03d} ] {train_metrics_str}\n[ Val | {epoch + 1:03d}/{configs.epochs:03d} ] {val_metrics_str}")
+        logger.log(f"[ Train | {epoch + 1:03d}/{configs['epochs']:03d} ] {train_metrics_str}\n[ Val | {epoch + 1:03d}/{configs['epochs']:03d} ] {val_metrics_str}")
+        print(f"[ Train | {epoch + 1:03d}/{configs['epochs']:03d} ] {train_metrics_str}\n[ Val | {epoch + 1:03d}/{configs['epochs']:03d} ] {val_metrics_str}")
 
         # save model
         # if val_metrics["loss"] < best_loss:

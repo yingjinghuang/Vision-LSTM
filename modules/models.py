@@ -6,8 +6,6 @@ import torchvision.models as models
 import math
 
 from torch import Tensor
-from einops import rearrange, reduce, repeat
-from einops.layers.torch import Rearrange, Reduce
 
 ################################################################################
 ################################ TAXI Part #####################################
@@ -210,7 +208,15 @@ class SVFeatureBlock(nn.Module):
             # b,c,f -> c,f
             x_tmp = x[sample]
             # c,f -> c_valid, f
-            x_tmp = x_tmp[x_tmp.nonzero(as_tuple=True)].view(-1, 512) # 去掉0的padding
+            # Get row sums
+            row_sums = torch.sum(x_tmp, dim=1)
+
+            # Find rows with non-zero sums
+            non_zero_rows = (row_sums != 0).nonzero().squeeze()
+
+            # Extract rows with non-zero sums
+            x_tmp = x_tmp[non_zero_rows]
+            # x_tmp = x_tmp[x_tmp.nonzero(as_tuple=True)].view(-1, 512) # 去掉0的padding
             
             if self.mode == "mean":
                 x_tmp = torch.mean(x_tmp, dim=0) # 按列求均值，得到(512)

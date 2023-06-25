@@ -3,12 +3,15 @@ import geopandas as gpd
 import numpy as np
 import os
 
-def build_dataset(valid_feature_path, taxi_ts_path, grids_label_path, valid_ratio, grids_geojson_path, model_data_path, model_data_geo_path):
+def build_dataset(valid_feature_path, taxi_ts_path, rs_tiles_folder, grids_label_path, valid_ratio, grids_geojson_path, model_data_path, model_data_geo_path):
     sv = pd.read_pickle(valid_feature_path)
     taxi = pd.read_csv(taxi_ts_path, dtype = {"GID": str}, index_col=0)
     taxi = taxi.reset_index()
     labels = pd.read_csv(grids_label_path, dtype = {'GID': str}, index_col=0)
-    intersect_set = set(sv["GID"]).intersection(set(taxi["GID"]))
+    intersect_set = list(set(sv["GID"]).intersection(set(taxi["GID"])))
+    for GID in intersect_set:
+        if not os.path.exists(os.path.join(rs_tiles_folder, GID + ".tif")):
+            intersect_set.remove(GID)
     print("Intersect size: ", len(intersect_set))
 
     sv_valid = sv[sv["GID"].isin(list(intersect_set))]

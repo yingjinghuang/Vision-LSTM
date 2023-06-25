@@ -174,14 +174,18 @@ class MultiDataset(Dataset):
 
         ## 处理 sv
         sv_attrs = self.sv_list[index]
-        sv_attrs = [float(x) if float(x)!=0 else 0.0000001 for x in sv_attrs.split(",")]
+        # sv_attrs = [float(x) if float(x)!=0 else 0.0000001 for x in sv_attrs.split(",")]
         sv_attrs = torch.FloatTensor(sv_attrs)
         sv_attrs = sv_attrs.view(-1, 512)
 
         # label = self.label_list[index].astype(np.int64)
         label = self.label_list[index]
 
-        sample = (image, sv_attrs, taxi_attrs, label)
+        sample = (
+            image, 
+            sv_attrs, 
+            taxi_attrs, 
+            label)
         return sample
     
     def __len__(self):
