@@ -217,22 +217,27 @@ class SVFeatureBlock(nn.Module):
             # Extract rows with non-zero sums
             x_tmp = x_tmp[non_zero_rows]
             # x_tmp = x_tmp[x_tmp.nonzero(as_tuple=True)].view(-1, 512) # 去掉0的padding
-            
+
             if self.mode == "mean":
-                x_tmp = torch.mean(x_tmp, dim=0) # 按列求均值，得到(512)
+                if x_tmp.dim() != 1:
+                    x_tmp = torch.mean(x_tmp, dim=0) # 按列求均值，得到(512)
             elif self.mode == "pca":
                 x_tmp, s, v = torch.pca_lowrank(x_tmp.T, 1)  # 按 PCA 降维，得到(512,1)
                 x_tmp = torch.squeeze(x_tmp) # 得到 (512)
             elif self.mode == "sum":
-                x_tmp = torch.sum(x_tmp, dim=0) # 按列求和
+                if x_tmp.dim() != 1:
+                    x_tmp = torch.sum(x_tmp, dim=0) # 按列求和
             elif self.mode == "max":
-                x_tmp = torch.max(x_tmp, dim=0).values # 按列求max
+                if x_tmp.dim() != 1:
+                    x_tmp = torch.max(x_tmp, dim=0).values # 按列求max
             elif self.mode == "lstm":
                 x_tmp, (h_n, c_n) = self.lstm(x_tmp.view(1, -1, 512)) # 输入 lstm 需要加上 batch 这个维度
                 x_tmp = x_tmp[:,-1,:] # 只取最后一层的输出 # （1,1,512)
                 x_tmp = torch.squeeze(x_tmp) # 得到 (512)
             else:
                 pass
+
+            # print(x[sample].shape, x_tmp.shape)
         
             x_list.append(x_tmp)
         
@@ -325,10 +330,6 @@ class MultiFeature1SV(nn.Module):
         model1 = models.resnet18(num_classes=2)
         self.remote_backbone = torch.nn.Sequential(*(list(model1.children())[:-1])) # 提取512维特征
 
-        # SV branch
-        model2 = models.resnet18(num_classes=2)
-        self.sv_backbone =  torch.nn.Sequential(*(list(model2.children())[:-1])) # 提取512维特征
-
         # Taxi branch
         self.taxi_backbone = LSTMFCNBlock(time_steps=340, num_variables=2)
         
@@ -344,7 +345,7 @@ class MultiFeature1SV(nn.Module):
         x1 = x1.view(-1, 512)
 
         # SV branch
-        x2 = self.sv_backbone(sv)
+        x2 = sv
         x2 = x2.view(-1, 512)
 
         # taxi branch

@@ -3,7 +3,7 @@ import os
 configs = {
     # Parameters
     # model name for folders of weights and tensorboard
-    "model_name" : "m3_lstm",
+    "model_name" : "m3_1000_single",
     # GPU id(s) to use
     # Format: a comma-delimited list. 0,1,2,3
     "gpu" : "0",
@@ -21,7 +21,7 @@ configs = {
     "workers" : 1,
     # the mode to decomposite street view
     # Format: single, mean, max, sum, lstm
-    "mode" : "lstm", 
+    "mode" : "single", 
 
     "modality_count": 3,
     "modalities": ["remote", "sv", "mobility"], 
@@ -30,6 +30,6 @@ configs = {
     "weights_folder": "Vision-LSTM//weights",
     "tensorboard_folder": "Vision-LSTM//tensorboard",
     "log_folder": "Vision-LSTM//logs",
-    "model_data_path": "Vision-LSTM/data/grids250/model_data.pkl",
-    "rs_path": "Vision-LSTM/data/grids250/rs_tiles"
+    "model_data_path": "Vision-LSTM/data/grids1000/model_data.pkl",
+    "rs_path": "Vision-LSTM/data/grids1000/rs_tiles"
 }

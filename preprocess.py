@@ -9,7 +9,7 @@ from shapely.geometry import Polygon
 ##############  Config part #######################
 ###################################################
 # Parameters
-grid_size = 250
+grid_size = 500
 valid_ratio = 0.2
 boundary_path = r".\data\raw\sz_qu.json"
 ground_truth_path = r".\data\raw\urbanVillage_sz\urbanVillage_sz_landtruth_2018.shp"
@@ -17,7 +17,7 @@ rs_tiff_path = r".\data\raw\shenzhen\shenzhen\shenzhen_大图\L19\shenzhen.tif"
 taxi_db_path = r".\data\taxi_valid2.db"
 sv_xy_info_path = r".\data\raw\shenzhen_all_50m_xy.csv"
 sv_path_path = r".\data\raw\shenzhen_all_50m_path.csv"
-sv_features_path = r".\data\features_all\*.csv"
+sv_features_path = r".\data\sv_all_feature\*.csv"
 
 # Outputs
 output_folder = f"Vision-LSTM/data/grids{grid_size}"
@@ -42,22 +42,27 @@ model_data_geo_path = os.path.join(output_folder, "model_data_geo.shp")
 ###################################################
 
 # Step 1: Generate grids
-# from preprocessing.gen_grids import gen_grids
-# gen_grids(grid_size, boundary_path, ground_truth_path, grids_geojson_path, grids_label_path)
+from preprocessing.gen_grids import gen_grids
+gen_grids(grid_size, boundary_path, ground_truth_path, grids_geojson_path, grids_label_path)
+print("Step 1 completed!")
 
 # Step 2: Prepare remote sensing data - Split tiles from huge GeoTiff file based on grids
-# from preprocessing.split_geotiff import split_image_by_shapefile
-# split_image_by_shapefile(rs_tiff_path, grids_geojson_path, rs_tiles_folder)
+from preprocessing.split_geotiff import split_image_by_shapefile
+split_image_by_shapefile(rs_tiff_path, grids_geojson_path, rs_tiles_folder)
+print("Step 2 completed!")
 
-# # Step 3: Prepare taxi data - Joined to grids and calculate the time series
-# from preprocessing.taxi_process import prepare_taxi
-# prepare_taxi(taxi_db_path, grids_geojson_path, taxi_joined_path, taxi_ts_path)
+# Step 3: Prepare taxi data - Joined to grids and calculate the time series
+from preprocessing.taxi_process import prepare_taxi
+prepare_taxi(taxi_db_path, grids_geojson_path, taxi_joined_path, taxi_ts_path)
+print("Step 3 completed!")
 
 # ## Step 4: Prepare street view data - Joined to grids
-# from preprocessing.sv_process import sv_join, features_join
-# sv_join(sv_xy_info_path, sv_path_path, grids_geojson_path, valid_sv_path)
-# features_join(valid_sv_path, sv_features_path, valid_feature_path)
+from preprocessing.sv_process import sv_join, features_join
+sv_join(sv_xy_info_path, sv_path_path, grids_geojson_path, valid_sv_path)
+features_join(valid_sv_path, sv_features_path, valid_feature_path)
+print("Step 4 completed!")
 
 # ## Step 5: Build datasets
 from preprocessing.build_dataset import build_dataset
 build_dataset(valid_feature_path, taxi_ts_path, rs_tiles_folder, grids_label_path, valid_ratio, grids_geojson_path, model_data_path, model_data_geo_path)
+print("Step 5 completed!")

@@ -233,10 +233,9 @@ class MultiDataset1SV(Dataset):
 
         ## 处理 sv
         sv_path = self.sv_list[index]
-        # 读取图像文件
-        sv = Image.open(sv_path)
-        # 数据增强
-        sv = transform(sv)
+        idx = np.random.randint(sv_path.shape[0], size=1)
+        sv = sv_path[idx, :]
+        sv = torch.FloatTensor(sv.astype(np.float32))
 
         # label = self.label_list[index].astype(np.int64)
         label = self.label_list[index]

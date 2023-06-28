@@ -36,7 +36,7 @@ def features_join(valid_sv_path, sv_features_path, valid_feature_path):
     sv["name"] = sv["path"].apply(os.path.basename)
 
     tmp_list = []
-    for file in glob, glob(sv_features_path):
+    for file in glob.glob(sv_features_path):
         tmp = pd.read_csv(file, index_col=0)
         del tmp["id"]
         tmp["path"] = tmp["path"].apply(os.path.basename)

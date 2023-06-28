@@ -25,7 +25,7 @@ def prepare_taxi(db_path, grids_path, taxi_joined_path, taxi_ts_path, threshold 
 
     ## 处理为时间序列
     res["hour"] = res["timestamp"].str[11:13]
-    res["hour"] = res["timestamp"].str[11:13]
+    res["date"] = res["timestamp"].str[:10]
 
     taxi_time_od_data = res.groupby(["GID", "date", "hour", "OD"]).size().unstack("OD").unstack("date").unstack("hour")
     taxi_time_od_data = taxi_time_od_data.fillna(0)
