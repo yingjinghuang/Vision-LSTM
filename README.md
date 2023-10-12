@@ -9,21 +9,25 @@ Street-level imagery has emerged as a valuable tool for observing large-scale ur
 ## Citation
 <!-- **If you find the resource useful, please cite the following :- )** -->
 ```bibtex
-
+@article{HUANG2023102043,
+title = {Comprehensive urban space representation with varying numbers of street-level images},
+journal = {Computers, Environment and Urban Systems},
+volume = {106},
+pages = {102043},
+year = {2023},
+issn = {0198-9715},
+doi = {https://doi.org/10.1016/j.compenvurbsys.2023.102043},
+url = {https://www.sciencedirect.com/science/article/pii/S0198971523001060},
+author = {Yingjing Huang and Fan Zhang and Yong Gao and Wei Tu and Fabio Duarte and Carlo Ratti and Diansheng Guo and Yu Liu},
+keywords = {Street-level imagery, Urban space representation, Multimodal data fusion, Deep learning, Urban village recognition}
 ```
 
-Will be updated when it is accepted.
-
-
 ## Highlights
-- A multimodal data fusion model (satellite imagery, street view imagery, human
-mobility) is proposed
-- Visual information and dynamic mobility information are both vital in urban
-village recognition
-- The Vision-LSTM module is proposed to extract visual features from a varying
-number of street images
-- The proposed method achieved an overall accuracy of 91.6% in identifying
-urban villages
+- Representing regional features by capturing associations among street-level images.
+- The proposed Vision-LSTM extract features from varying numbers of images.
+- Multimodal model fused satellite imagery, street-level imagery, and mobility data.
+- Both visual and dynamic mobility information crucial for urban village recognition.
+- The framework achieved 91.6% accuracy in identifying urban villages.
 
 ## Results
 In our urban village recognition case, the results can be seen in the following table.
