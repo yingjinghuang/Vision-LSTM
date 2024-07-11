@@ -9,7 +9,7 @@ Street-level imagery has emerged as a valuable tool for observing large-scale ur
 ![Framework of Vision-LSTM](./img/Vision-LSTM.png)
 
 ## Citation
-<!-- **If you find the resource useful, please cite the following :- )** -->
+**If you find the resource useful, please cite the following :- )**
 ```bibtex
 @article{HUANG2023102043,
 title = {Comprehensive urban space representation with varying numbers of street-level images},
