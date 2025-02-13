@@ -1,14 +1,14 @@
-# Vision-LSTM
+# Vision-LSTM 🚀
 Authors: Yingjing Huang, Fan zhang, Yong Gao, Wei Tu, Fabio Duarte, Carlo Ratti, Diansheng Guo, Yu Liu
 
 [PaperLink](https://www.sciencedirect.com/science/article/pii/S0198971523001060)
 
-## Abstract
+## Abstract 🌍
 Street-level imagery has emerged as a valuable tool for observing large-scale urban spaces with unprecedented detail. However, previous studies have been limited to analyzing individual street-level images. This approach falls short in representing the characteristics of a spatial unit, such as a street or grid, which may contain a varying number of street view images ranging from several to hundreds. As a result, a more comprehensive and representative approach is required to capture the complexity and diversity of urban environments at different spatial scales. To address this issue, this study proposes a deep learning-based module called **Vision-LSTM**, which can effectively **obtain vector representation from varying numbers of street-level images in spatial units**. The effectiveness of the module is validated through experiments to recognize urban villages, achieving reliable recognition results (overall accuracy: 91.6\%) through multimodal learning that combines street-level imagery with remote sensing imagery and social sensing data. Compared to existing image fusion methods, Vision-LSTM demonstrates significant effectiveness in capturing associations between street-level images. The proposed module can provide a more comprehensive understanding of urban space, enhancing the research value of street-level imagery and facilitating multimodal learning-based urban research. Our models are available at https://github.com/yingjinghuang/Vision-LSTM.
 
 ![Framework of Vision-LSTM](./img/Vision-LSTM.png)
 
-## Citation
+## Citation 📚
 **If you find the resource useful, please cite the following :- )**
 ```bibtex
 @article{HUANG2023102043,
@@ -24,14 +24,14 @@ author = {Yingjing Huang and Fan Zhang and Yong Gao and Wei Tu and Fabio Duarte 
 keywords = {Street-level imagery, Urban space representation, Multimodal data fusion, Deep learning, Urban village recognition}
 ```
 
-## Highlights
+## Highlights ✨
 - Representing regional features by capturing associations among street-level images.
-- The proposed Vision-LSTM extract features from varying numbers of images.
-- Multimodal model fused satellite imagery, street-level imagery, and mobility data.
-- Both visual and dynamic mobility information crucial for urban village recognition.
-- The framework achieved 91.6% accuracy in identifying urban villages.
+- The proposed Vision-LSTM extracts features from varying numbers of images.
+- A multimodal model that fuses satellite imagery 🌍, street-level imagery 🚗, and mobility data 📊.
+- Both visual and dynamic mobility information are crucial for urban village recognition.
+- The framework achieved 91.6% accuracy in identifying urban villages 🏙️.
 
-## Results
+## Results 📈
 In our urban village recognition case, the results can be seen in the following table.
 
 | Method                                   | OA(%)     | Kappa     | F1        |
@@ -42,10 +42,7 @@ In our urban village recognition case, the results can be seen in the following 
 | Element-wise Sum                         | 77.4      | 0.432     | 0.566     |
 | **Vision-LSTM (proposed in this study)** | **91.6**  | **0.720** | **0.773** |
 
-## Setup
-Will update with a requirement file.
-
-## Usage
+## Usage 🛠️
 **Step 1**. Prepare your own datasets.
 
 **Step 2**. Run the [preprocess.py](preprocess.py) to preprocess data.
